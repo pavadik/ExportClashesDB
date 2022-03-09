@@ -5,6 +5,7 @@ using System.Data;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Data.SqlClient;
 
 namespace ExportClashesDB
 {
@@ -119,6 +120,15 @@ namespace ExportClashesDB
             }
 
             return table;
+        }
+        public static void DataTableBulkInsert(this DataTable Table, SqlConnection connection, string destinationDataTable)
+        {
+            SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection);
+            sqlBulkCopy.DestinationTableName = destinationDataTable;
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+            sqlBulkCopy.WriteToServer(Table);
+            connection.Close();
         }
     }
 }
