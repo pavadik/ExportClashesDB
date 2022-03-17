@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExportClashesDB2021
+namespace ExportClashesDB
 {
     public class Connection
     {

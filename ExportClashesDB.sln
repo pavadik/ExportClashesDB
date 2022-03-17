@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportClashesDB", "ExportClashesDB\ExportClashesDB.csproj", "{0E409AF4-A4AD-481C-87B4-16BD40FE1271}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportClashesDB2021", "ExportClashesDB2021\ExportClashesDB2021.csproj", "{953B3CDB-CB30-4341-AE3F-1F050B812864}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0E409AF4-A4AD-481C-87B4-16BD40FE1271}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E409AF4-A4AD-481C-87B4-16BD40FE1271}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E409AF4-A4AD-481C-87B4-16BD40FE1271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953B3CDB-CB30-4341-AE3F-1F050B812864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953B3CDB-CB30-4341-AE3F-1F050B812864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{953B3CDB-CB30-4341-AE3F-1F050B812864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953B3CDB-CB30-4341-AE3F-1F050B812864}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

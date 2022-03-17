@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.ComApi;
 using Autodesk.Navisworks.Api.Plugins;
@@ -16,9 +15,9 @@ using System.Data.SqlClient;
 using Application = Autodesk.Navisworks.Api.Application;
 using System.Reflection;
 using System.IO;
+using System.Windows;
 
-
-namespace ExportClashesDB
+namespace ExportClashesDB2021
 {
     [Plugin("ExportClashes", "IYNO", DisplayName = "Экспорт пересечений")]
     [AddInPlugin(AddInLocation.AddIn)]
@@ -32,10 +31,6 @@ namespace ExportClashesDB
             string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string settings = Path.Combine(assemblyFolder, "ExportClashesDBSettings.txt");
             var connectionString = File.ReadAllLines(settings)[0];
-
-            var oModelColl = Autodesk.Navisworks.Api.Application.ActiveDocument.Models.First.RootItem.Descendants.Where(x => x?.InstanceGuid != null).Where(x => !x.IsHidden && x.InstanceGuid.ToString() != "" && x.InstanceGuid.ToString() != "00000000-0000-0000-0000-000000000000").ToList();
-            var allElements = oModelColl.Select(x => new Element(x)).ToList();
-
             if (oldtests.Count != 0 && File.Exists(settings))
             {
                 foreach (ClashTest test in oldtests)
@@ -47,21 +42,19 @@ namespace ExportClashesDB
                 {
                     using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
                     {
+
                         if (!IsExistTable("ClashObjects", connection))
                             CreateTableInDataBaseClashObjects("ClashObjects", connection);
 
                         if (!IsExistTable("ClashTests", connection))
                             CreateTableInDataBaseClashTests("ClashTests", connection);
-
+                        
                         if (!IsExistTable("ClashResults", connection))
                             CreateTableInDataBaseClashResults("ClashResults", connection);
-
-                        if (connection.State == ConnectionState.Closed)
-                            connection.Open();
-
+                        
                         //To get data from DB table Elements
                         string query = "select ItemGuid from ClashObjects";
-
+                        connection.Open();
                         SqlCommand cmd = new SqlCommand(query, connection);
                         DataTable sourceData = new DataTable("ClashObjects");
                         sourceData.Columns.Add(new DataColumn("ItemGuid", typeof(string)));
@@ -94,29 +87,36 @@ namespace ExportClashesDB
                             dtClashResults.DataTableBulkInsert(connection, "ClashResults");
                         }
 
-                        var elementsOfClash = listObjectsGuid.Distinct().ToList();
+                        var distinctListObjectGuid = listObjectsGuid.Distinct().ToList();
                         var sourcelist = sourceData.AsEnumerable().ToList();
-                        var excludedListObjectGuid = elementsOfClash.Where(x => sourcelist.All(y => y.ItemArray[0].ToString() != x.ToString()));
-
-                        var joinResult = (from modelElement in allElements.AsEnumerable()
-                                          join elementOfClash in excludedListObjectGuid.AsEnumerable()
-                                          on modelElement.ItemGuid
-                                          equals elementOfClash
-                                          select modelElement).ToList();
+                        var excludedListObjectGuid = distinctListObjectGuid.Where(x => sourcelist.All(y => y.ItemArray[0].ToString() != x.ToString()));
 
                         DataTable dtClashObjects = CreateDataTableClashObjects();
-                        joinResult.AddToDataTable(dtClashObjects);
 
+                        Search search_2 = new Search();
+                        search_2.Selection.SelectAll();
+
+                        List<SearchCondition[]> listcondit = new List<SearchCondition[]>();
+                        foreach (var itemGuid in excludedListObjectGuid)
+                        {
+                            listcondit.Add(new SearchCondition[] { (SearchCondition.HasPropertyByName("LcOaNode", "LcOaNodeGuid").DisplayStringWildcard(itemGuid.ToString())) });
+                        }
+                        foreach (var sccon in listcondit)
+                        {
+                            search_2.SearchConditions.AddGroup(sccon);
+                        }
+                        var modelItems = search_2.FindAll(Autodesk.Navisworks.Api.Application.ActiveDocument, false);
+                        if (modelItems != null)
+                            foreach (var modelItem in modelItems)
+                            {
+                                FillDataTableClashObjects(dtClashObjects, modelItem);
+                            }
                         dtClashObjects.DataTableBulkInsert(connection, "ClashObjects");
-                        if (connection.State == ConnectionState.Open)
-                            connection.Close();
-                        MessageBox.Show("Выгрузка завершена!");
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                    return 0;
                 }
 
             }
@@ -133,56 +133,55 @@ namespace ExportClashesDB
             return 0;
         }
 
-        private void CreateTableInDataBaseClashResults(string tableName, SqlConnection connection)
+        private void CreateTableInDataBaseClashResults(string tableName, SqlConnection conn)
         {
-            if (connection.State == ConnectionState.Closed)
-                connection.Open();
-            SqlCommand cmd = new SqlCommand("create table " + tableName + " (Name nvarchar(256), ClashGUID nvarchar(80), X nvarchar(100), Y nvarchar(100), Z nvarchar(100), ClashGridIntersection nvarchar(256), ClashLevel nvarchar(256), Item1Guid nvarchar(256), Item2Guid nvarchar(256), ClashResultStatus nvarchar(256), ClashDistance nvarchar(256), ClashTestID nvarchar(256));", connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("create table " + tableName + " (Name nvarchar(256), ClashGUID nvarchar(80), X nvarchar(100), Y nvarchar(100), Z nvarchar(100), ClashGridIntersection nvarchar(256), ClashLevel nvarchar(256), Item1Guid nvarchar(256), Item2Guid nvarchar(256), ClashResultStatus nvarchar(256), ClashDistance nvarchar(256), ClashTestID nvarchar(256));", conn);
             cmd.ExecuteNonQuery();
+            conn.Close();
         }
 
-        private void CreateTableInDataBaseClashTests(string tableName, SqlConnection connection)
+        private void CreateTableInDataBaseClashTests(string tableName, SqlConnection conn)
         {
-            if (connection.State == ConnectionState.Closed)
-                connection.Open();
-            SqlCommand cmd = new SqlCommand("create table " + tableName + " (Name nvarchar(256), Type nvarchar(256), Status nvarchar(40), [Tolerance] nvarchar(100), [MergeComposite] nvarchar(100), [SelectionSetLeft] nvarchar(256), [SelectionSetRight] nvarchar(256), [CreateDate] nvarchar(50), [ClashTestID] nvarchar(80));", connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("create table " + tableName + " (Name nvarchar(256), Type nvarchar(256), Status nvarchar(40), [Tolerance] nvarchar(100), [MergeComposite] nvarchar(100), [SelectionSetLeft] nvarchar(256), [SelectionSetRight] nvarchar(256), [CreateDate] nvarchar(50), [ClashTestID] nvarchar(80));", conn);
             cmd.ExecuteNonQuery();
+            conn.Close();
         }
 
-        private void CreateTableInDataBaseClashObjects(string tableName, SqlConnection connection)
+        private void CreateTableInDataBaseClashObjects(string tableName, SqlConnection conn)
         {
-            if (connection.State == ConnectionState.Closed)
-                connection.Open();
-            SqlCommand cmd = new SqlCommand("create table " + tableName + " (ItemGuid nvarchar(80), ID nvarchar(50), WorksetName nvarchar(256), Category nvarchar(80), SourceFile nvarchar(256), FamilyName nvarchar(256), TypeName nvarchar(256));", connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("create table " + tableName + " (ItemGuid nvarchar(80), ID nvarchar(50), WorksetName nvarchar(256), Category nvarchar(80), SourceFile nvarchar(256), FamilyName nvarchar(256), TypeName nvarchar(256));", conn);
             cmd.ExecuteNonQuery();
+            conn.Close();
         }
 
-        private bool IsExistTable(string tableName, SqlConnection connection)
+        private bool IsExistTable(string tableName, SqlConnection conn)
         {
-            bool exist;
-            if (connection.State == ConnectionState.Closed)
-                connection.Open();
+            bool exists;
+
             try
-            {
+            { 
                 var cmd = new SqlCommand(
-                  "select case when exists((select * from information_schema.tables where table_name = '" + tableName + "')) then 1 else 0 end", connection);
+                  "select case when exists((select * from information_schema.tables where table_name = '" + tableName + "')) then 1 else 0 end", conn);
 
-                exist = (int)cmd.ExecuteScalar() == 1;
+                exists = (int)cmd.ExecuteScalar() == 1;
             }
             catch
             {
                 try
                 {
+                    exists = true;
                     var cmdOthers = new SqlCommand("select 1 from " + tableName + " where 1 = 0");
                     cmdOthers.ExecuteNonQuery();
-                    exist = true;
                 }
                 catch
                 {
-                    exist = false;
+                    exists = false;
                 }
             }
-            return exist;
+            return exists;
         }
 
         private static void FillDataTableClashObjects(DataTable dtClashObjects, ModelItem modelItem)
