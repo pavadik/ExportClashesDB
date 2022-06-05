@@ -130,5 +130,11 @@ namespace ExportClashesDB2021
             sqlBulkCopy.WriteToServer(Table);
             connection.Close();
         }
+        public static void DataTableBulkInsert(this DataTable Table, string connectionsString, string destinationDataTable)
+        {
+            SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connectionsString, SqlBulkCopyOptions.FireTriggers);
+            sqlBulkCopy.DestinationTableName = destinationDataTable;
+            sqlBulkCopy.WriteToServer(Table);
+        }
     }
 }

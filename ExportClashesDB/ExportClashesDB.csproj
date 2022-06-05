@@ -32,29 +32,28 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autodesk.Navisworks.Api">
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2019\Autodesk.Navisworks.Api.dll</HintPath>
+      <HintPath>E:\Navisworks\2019\Autodesk.Navisworks.Api.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Autodesk.Navisworks.Clash">
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2019\Autodesk.Navisworks.Clash.dll</HintPath>
+      <HintPath>E:\Navisworks\2019\Autodesk.Navisworks.Clash.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Autodesk.Navisworks.ComApi">
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2019\Autodesk.Navisworks.ComApi.dll</HintPath>
+      <HintPath>E:\Navisworks\2019\Autodesk.Navisworks.ComApi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Autodesk.Navisworks.Interop.ComApi">
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2019\Autodesk.Navisworks.Interop.ComApi.dll</HintPath>
+      <HintPath>E:\Navisworks\2019\Autodesk.Navisworks.Interop.ComApi.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Autodesk.Navisworks.Interop.ComApiAutomation">
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2019\Autodesk.Navisworks.Interop.ComApiAutomation.dll</HintPath>
+      <HintPath>E:\Navisworks\2019\Autodesk.Navisworks.Interop.ComApiAutomation.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Text.Json, Version=5.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

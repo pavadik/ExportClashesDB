@@ -69,7 +69,7 @@ namespace ExportClashesDB2021
                             DataTable dtClashTests = CreateDataTableClashTest();
 
                             Guid clashTestID = FillDataTabeClashTest(test, dtClashTests);
-                            dtClashTests.DataTableBulkInsert(connection, "ClashTests");
+                            dtClashTests.DataTableBulkInsert(connection.ConnectionString, "ClashTests");
 
                             DataTable dtClashResults = CreateDataTableClashResults();
 
@@ -84,7 +84,7 @@ namespace ExportClashesDB2021
                                     listObjectsGuid.Add(rt.Item2.InstanceGuid.ToString());
                                 }
                             }
-                            dtClashResults.DataTableBulkInsert(connection, "ClashResults");
+                            dtClashResults.DataTableBulkInsert(connection.ConnectionString, "ClashResults");
                         }
 
                         var distinctListObjectGuid = listObjectsGuid.Distinct().ToList();
@@ -111,7 +111,7 @@ namespace ExportClashesDB2021
                             {
                                 FillDataTableClashObjects(dtClashObjects, modelItem);
                             }
-                        dtClashObjects.DataTableBulkInsert(connection, "ClashObjects");
+                        dtClashObjects.DataTableBulkInsert(connection.ConnectionString, "ClashObjects");
                     }
                 }
                 catch (Exception ex)

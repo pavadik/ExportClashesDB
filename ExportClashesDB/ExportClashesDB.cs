@@ -33,7 +33,11 @@ namespace ExportClashesDB
             string settings = Path.Combine(assemblyFolder, "ExportClashesDBSettings.txt");
             var connectionString = File.ReadAllLines(settings)[0];
 
-            var oModelColl = Autodesk.Navisworks.Api.Application.ActiveDocument.Models.First.RootItem.Descendants.Where(x => x?.InstanceGuid != null).Where(x => !x.IsHidden && x.InstanceGuid.ToString() != "" && x.InstanceGuid.ToString() != "00000000-0000-0000-0000-000000000000").ToList();
+            var oModelColl = Autodesk.Navisworks.Api.Application.ActiveDocument.Models?.First?.RootItem?.Descendants?.Where(x => x?.InstanceGuid != null).Where(x => !x.IsHidden && x.InstanceGuid.ToString() != "" && x.InstanceGuid.ToString() != "00000000-0000-0000-0000-000000000000")?.ToList();
+            
+            if (oModelColl == null)
+                return 0;
+
             var allElements = oModelColl.Select(x => new Element(x)).ToList();
 
             if (oldtests.Count != 0 && File.Exists(settings))
@@ -76,7 +80,7 @@ namespace ExportClashesDB
                             DataTable dtClashTests = CreateDataTableClashTest();
 
                             Guid clashTestID = FillDataTabeClashTest(test, dtClashTests);
-                            dtClashTests.DataTableBulkInsert(connection, "ClashTests");
+                            dtClashTests.DataTableBulkInsert(connection.ConnectionString, "ClashTests");
 
                             DataTable dtClashResults = CreateDataTableClashResults();
 
@@ -91,7 +95,7 @@ namespace ExportClashesDB
                                     listObjectsGuid.Add(rt.Item2.InstanceGuid.ToString());
                                 }
                             }
-                            dtClashResults.DataTableBulkInsert(connection, "ClashResults");
+                            dtClashResults.DataTableBulkInsert(connection.ConnectionString, "ClashResults");
                         }
 
                         var elementsOfClash = listObjectsGuid.Distinct().ToList();
@@ -107,7 +111,8 @@ namespace ExportClashesDB
                         DataTable dtClashObjects = CreateDataTableClashObjects();
                         joinResult.AddToDataTable(dtClashObjects);
 
-                        dtClashObjects.DataTableBulkInsert(connection, "ClashObjects");
+                        dtClashObjects.DataTableBulkInsert(connection.ConnectionString, "ClashObjects");
+                        
                         if (connection.State == ConnectionState.Open)
                             connection.Close();
                         MessageBox.Show("Выгрузка завершена!");
