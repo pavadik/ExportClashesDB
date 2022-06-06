@@ -80,7 +80,7 @@ namespace ExportClashesDB
                             DataTable dtClashTests = CreateDataTableClashTest();
 
                             Guid clashTestID = FillDataTabeClashTest(test, dtClashTests);
-                            dtClashTests.DataTableBulkInsert(connection.ConnectionString, "ClashTests");
+                            dtClashTests.DataTableBulkInsert(connectionString, "ClashTests");
 
                             DataTable dtClashResults = CreateDataTableClashResults();
 
@@ -95,7 +95,7 @@ namespace ExportClashesDB
                                     listObjectsGuid.Add(rt.Item2.InstanceGuid.ToString());
                                 }
                             }
-                            dtClashResults.DataTableBulkInsert(connection.ConnectionString, "ClashResults");
+                            dtClashResults.DataTableBulkInsert(connectionString, "ClashResults");
                         }
 
                         var elementsOfClash = listObjectsGuid.Distinct().ToList();
@@ -111,7 +111,7 @@ namespace ExportClashesDB
                         DataTable dtClashObjects = CreateDataTableClashObjects();
                         joinResult.AddToDataTable(dtClashObjects);
 
-                        dtClashObjects.DataTableBulkInsert(connection.ConnectionString, "ClashObjects");
+                        dtClashObjects.DataTableBulkInsert(connectionString, "ClashObjects");
                         
                         if (connection.State == ConnectionState.Open)
                             connection.Close();
