@@ -75,15 +75,11 @@ namespace ExportClashesDB
                         }
                         var listObjectsGuid = new List<string>();
                         // Создаем DataTable для таблицы ClashTests
+                        DataTable dtClashTests = CreateDataTableClashTest();
+                        DataTable dtClashResults = CreateDataTableClashResults();
                         foreach (var test in tests)
                         {
-                            DataTable dtClashTests = CreateDataTableClashTest();
-
                             Guid clashTestID = FillDataTabeClashTest(test, dtClashTests);
-                            dtClashTests.DataTableBulkInsert(connectionString, "ClashTests");
-
-                            DataTable dtClashResults = CreateDataTableClashResults();
-
                             var clashResults = (test as ClashTest).Children;
                             foreach (var clashResult in clashResults)
                             {
@@ -94,8 +90,7 @@ namespace ExportClashesDB
                                     listObjectsGuid.Add(rt.Item1.InstanceGuid.ToString());
                                     listObjectsGuid.Add(rt.Item2.InstanceGuid.ToString());
                                 }
-                            }
-                            dtClashResults.DataTableBulkInsert(connectionString, "ClashResults");
+                            }                            
                         }
 
                         var elementsOfClash = listObjectsGuid.Distinct().ToList();
@@ -111,11 +106,12 @@ namespace ExportClashesDB
                         DataTable dtClashObjects = CreateDataTableClashObjects();
                         joinResult.AddToDataTable(dtClashObjects);
 
+                        dtClashTests.DataTableBulkInsert(connectionString, "ClashTests");
+                        dtClashResults.DataTableBulkInsert(connectionString, "ClashResults");
                         dtClashObjects.DataTableBulkInsert(connectionString, "ClashObjects");
-                        
+
                         if (connection.State == ConnectionState.Open)
                             connection.Close();
-                        MessageBox.Show("Выгрузка завершена!");
                     }
                 }
                 catch (Exception ex)
@@ -135,6 +131,7 @@ namespace ExportClashesDB
                 MessageBox.Show("Файл с настройками подключения к базе данных не найден.");
                 return 0;
             }
+            //MessageBox.Show("Выгрузка завершена.");
             return 0;
         }
 

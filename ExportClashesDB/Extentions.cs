@@ -134,6 +134,7 @@ namespace ExportClashesDB
         {
             SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connectionsString, SqlBulkCopyOptions.FireTriggers);
             sqlBulkCopy.DestinationTableName = destinationDataTable;
+            sqlBulkCopy.BulkCopyTimeout = 0;
             sqlBulkCopy.WriteToServer(Table);
         }
     }
